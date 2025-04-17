@@ -45,7 +45,9 @@ namespace TesteGrafico2
             comboMes.Items.Clear();
             for (int i = 1; i <= 12; i++)
             {
-                comboMes.Items.Add(new DateTime(1, i, 1).ToString("MMMM", new CultureInfo("pt-BR")));
+                // Formatar o mês com a primeira letra maiúscula
+                string nomeMes = new DateTime(1, i, 1).ToString("MMMM", new CultureInfo("pt-BR"));
+                comboMes.Items.Add(CultureInfo.CurrentCulture.TextInfo.ToTitleCase(nomeMes.ToLower()));
             }
             comboMes.SelectedIndex = DateTime.Now.Month - 1;
 
@@ -83,6 +85,7 @@ namespace TesteGrafico2
                 MessageBox.Show("Erro ao carregar filtros: " + ex.Message);
             }
         }
+
 
         private void FiltrosAlterados(object sender, EventArgs e)
         {
@@ -144,13 +147,23 @@ namespace TesteGrafico2
                         chart1.Titles.Clear();
                         chart1.Legends.Clear();
 
-                        string titulo = isAnual ? $"{tipo}s por Categoria - {ano}" :
-                                                  $"{tipo}s por Categoria - {mes:D2}/{ano}";
+                        string titulo;
 
+                        if (isAnual)
+                        {
+                            titulo = $"{tipo}s por Categoria - {ano}";
+                        }
+                        else
+                        {
+                            // Formatar o mês com a primeira letra maiúscula
+                            string nomeMes = new DateTime(ano, mes, 1).ToString("MMMM", new CultureInfo("pt-BR"));
+                            nomeMes = CultureInfo.CurrentCulture.TextInfo.ToTitleCase(nomeMes.ToLower());  // Garantir a primeira letra maiúscula
+                            titulo = $"{tipo}s por Categoria - {ano} {nomeMes}"; // Invertendo para o ano primeiro
+                        }
+
+                        // Adicionar título centralizado
                         chart1.Titles.Add(titulo).Font = new Font("Arial", 14, FontStyle.Bold);
-                        chart1.Titles.Add("Proporção em % com valores nas legendas").Font = new Font("Arial", 9);
-                        chart1.Titles[1].Docking = Docking.Top;
-                        chart1.Titles[1].ForeColor = Color.Gray;
+                        chart1.Titles[0].Alignment = ContentAlignment.MiddleCenter; // Centralizando o título
 
                         Series pieSeries = new Series
                         {
@@ -182,10 +195,11 @@ namespace TesteGrafico2
 
                         chart1.Series.Add(pieSeries);
 
+                        // Adicionar legenda à direita e centralizada verticalmente
                         chart1.Legends.Add(new Legend
                         {
-                            Docking = Docking.Right,
-                            Alignment = StringAlignment.Near,
+                            Docking = Docking.Right, // Coloca a legenda à direita
+                            Alignment = StringAlignment.Center, // Centraliza verticalmente
                             Font = new Font("Arial", 9)
                         });
                     }
